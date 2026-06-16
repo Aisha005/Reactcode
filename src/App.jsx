@@ -5,7 +5,7 @@ import StatsBar from './components/StatsBar.jsx';
 import Toast from './components/Toast.jsx';
 
 const INITIAL_CONTENT =
-  '<p>Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
+  '<p>Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
 
 const getPlainText = (element) => element?.innerText || '';
 
