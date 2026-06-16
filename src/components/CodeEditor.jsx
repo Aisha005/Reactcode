@@ -67,10 +67,10 @@ function CodeEditor({
           Code PDF
         </button>
         <button className="secondary-text-button" type="button" onClick={onDownloadPreviewImage}>
-          Preview image
+          Download preview image
         </button>
         <button className="primary-text-button" type="button" onClick={onDownloadPreviewPdf}>
-          Preview PDF
+          Download preview PDF
         </button>
       </div>
     </section>

@@ -447,7 +447,7 @@ button {
 
 .code-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
   gap: 14px;
 }
 
@@ -462,7 +462,7 @@ button {
 }
 
 .code-box textarea {
-  min-height: 420px;
+  min-height: 560px;
   resize: vertical;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -483,10 +483,15 @@ button {
 .preview-box iframe,
 .preview-placeholder {
   width: 100%;
-  min-height: 420px;
+  height: 560px;
+  min-height: 560px;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   background: #ffffff;
+}
+
+.preview-box iframe {
+  display: block;
 }
 
 .preview-placeholder {

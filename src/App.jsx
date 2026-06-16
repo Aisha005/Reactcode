@@ -58,8 +58,6 @@ const textToHtml = (text) =>
     .map((paragraph) => `<p>${paragraph.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>`)
     .join('');
 
-const escapePdfText = (text) => text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-
 const downloadBlob = (blob, filename) => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -74,100 +72,50 @@ const downloadTextFile = (text, filename, type = 'text/plain;charset=utf-8') => 
   downloadBlob(new Blob([text], { type }), filename);
 };
 
-const binaryStringToBlob = (content, type) => {
-  const bytes = new Uint8Array(content.length);
-
-  for (let index = 0; index < content.length; index += 1) {
-    bytes[index] = content.charCodeAt(index) & 0xff;
-  }
-
-  return new Blob([bytes], { type });
-};
-
-const buildPdf = (objects) => {
-  let pdf = '%PDF-1.4\n';
-  const offsets = [0];
-
-  objects.forEach((object, index) => {
-    offsets[index + 1] = pdf.length;
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
-  });
-
-  const xrefOffset = pdf.length;
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-  offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, '0')} 00000 n \n`;
-  });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
-
-  return binaryStringToBlob(pdf, 'application/pdf');
-};
-
-const downloadTextPdf = (text, filename) => {
-  const pageWidth = 612;
-  const pageHeight = 792;
+const downloadTextPdf = async (text, filename) => {
+  const { jsPDF } = await import('jspdf');
+  const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
   const margin = 36;
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
   const lineHeight = 13;
-  const maxChars = 86;
-  const maxLines = Math.floor((pageHeight - margin * 2) / lineHeight);
-  const lines = text.split('\n').flatMap((line) => {
-    if (!line) return [''];
-    const wrapped = [];
+  let y = margin;
 
-    for (let index = 0; index < line.length; index += maxChars) {
-      wrapped.push(line.slice(index, index + maxChars));
-    }
+  pdf.setFont('courier', 'normal');
+  pdf.setFontSize(9);
 
-    return wrapped;
-  });
-  const pages = [];
+  text.split('\n').forEach((line) => {
+    const wrappedLines = pdf.splitTextToSize(line || ' ', pageWidth - margin * 2);
 
-  for (let index = 0; index < lines.length; index += maxLines) {
-    pages.push(lines.slice(index, index + maxLines));
-  }
+    wrappedLines.forEach((wrappedLine) => {
+      if (y > pageHeight - margin) {
+        pdf.addPage();
+        y = margin;
+      }
 
-  const objects = [];
-  const pageRefs = pages.map((_, index) => `${4 + index * 2} 0 R`).join(' ');
-  objects.push('<< /Type /Catalog /Pages 2 0 R >>');
-  objects.push(`<< /Type /Pages /Kids [${pageRefs}] /Count ${pages.length} >>`);
-  objects.push('<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>');
-
-  pages.forEach((pageLines, index) => {
-    const pageObjectNumber = 4 + index * 2;
-    const contentObjectNumber = pageObjectNumber + 1;
-    const stream = `BT /F1 10 Tf ${margin} ${pageHeight - margin} Td ${lineHeight} TL ${pageLines
-      .map((line) => `(${escapePdfText(line)}) Tj T*`)
-      .join(' ')} ET`;
-
-    objects.push(
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObjectNumber} 0 R >>`
-    );
-    objects.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+      pdf.text(wrappedLine, margin, y);
+      y += lineHeight;
+    });
   });
 
-  downloadBlob(buildPdf(objects), filename);
+  pdf.save(filename);
 };
 
-const downloadImagePdf = (canvas, filename) => {
-  const pageWidth = 612;
-  const pageHeight = 792;
-  const margin = 32;
+const downloadImagePdf = async (canvas, filename) => {
+  const { jsPDF } = await import('jspdf');
+  const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+  const pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 24;
   const scale = Math.min((pageWidth - margin * 2) / canvas.width, (pageHeight - margin * 2) / canvas.height);
   const imageWidth = canvas.width * scale;
   const imageHeight = canvas.height * scale;
   const x = (pageWidth - imageWidth) / 2;
   const y = (pageHeight - imageHeight) / 2;
-  const jpegBinary = atob(canvas.toDataURL('image/jpeg', 0.94).split(',')[1]);
-  const content = `q ${imageWidth.toFixed(2)} 0 0 ${imageHeight.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm /Im1 Do Q`;
-  const objects = [
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>`,
-    `<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBinary.length} >>\nstream\n${jpegBinary}\nendstream`,
-    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`
-  ];
 
-  downloadBlob(buildPdf(objects), filename);
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imageWidth, imageHeight);
+  pdf.save(filename);
 };
 
 const getCodeExtension = (language) => {
@@ -526,42 +474,44 @@ function App() {
       }
 
       const iframe = previewRef.current;
-      const width = Math.max(800, iframe?.clientWidth || 800);
-      const height = Math.max(520, iframe?.clientHeight || 520);
       const previewDocument = iframe?.contentDocument;
-      const styleTags = Array.from(previewDocument?.head?.querySelectorAll('style') || [])
-        .map((style) => style.outerHTML)
-        .join('');
-      const bodyHtml = previewDocument?.body?.innerHTML || code;
-      const bodyStyle = previewDocument?.body?.getAttribute('style') || '';
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-        <foreignObject width="100%" height="100%">
-          <html xmlns="http://www.w3.org/1999/xhtml">
-            <head>${styleTags}</head>
-            <body style="width:${width}px;height:${height}px;margin:0;background:#ffffff;${bodyStyle}">
-              ${bodyHtml}
-            </body>
-          </html>
-        </foreignObject>
-      </svg>`;
-      const image = new Image();
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+      const previewBody = previewDocument?.body;
+      const previewRoot = previewDocument?.documentElement;
 
-      canvas.width = width;
-      canvas.height = height;
-      image.onload = () => {
-        context.fillStyle = '#ffffff';
-        context.fillRect(0, 0, width, height);
-        context.drawImage(image, 0, 0);
-        URL.revokeObjectURL(image.src);
-        resolve(canvas);
+      if (!previewBody || !previewRoot) {
+        reject(new Error('Preview is not ready'));
+        return;
+      }
+
+      const capture = async () => {
+        const width = Math.max(previewRoot.scrollWidth, previewBody.scrollWidth, iframe.clientWidth, 900);
+        const height = Math.max(previewRoot.scrollHeight, previewBody.scrollHeight, iframe.clientHeight, 560);
+
+        try {
+          const { default: html2canvas } = await import('html2canvas');
+          const canvas = await html2canvas(previewBody, {
+            backgroundColor: '#ffffff',
+            width,
+            height,
+            windowWidth: width,
+            windowHeight: height,
+            scrollX: 0,
+            scrollY: 0,
+            scale: Math.min(2, window.devicePixelRatio || 1),
+            useCORS: true
+          });
+
+          resolve(canvas);
+        } catch (error) {
+          reject(error);
+        }
       };
-      image.onerror = () => {
-        URL.revokeObjectURL(image.src);
-        reject(new Error('Preview capture failed'));
-      };
-      image.src = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+
+      if (previewDocument.readyState === 'complete') {
+        window.requestAnimationFrame(capture);
+      } else {
+        iframe.addEventListener('load', () => window.requestAnimationFrame(capture), { once: true });
+      }
     });
 
   const handleDownloadCode = () => {
@@ -575,13 +525,13 @@ function App() {
     showToast('Code downloaded');
   };
 
-  const handleDownloadCodePdf = () => {
+  const handleDownloadCodePdf = async () => {
     if (!code.trim()) {
       showToast('No code to export');
       return;
     }
 
-    downloadTextPdf(code, 'code-output.pdf');
+    await downloadTextPdf(code, 'code-output.pdf');
     showToast('Code PDF downloaded');
   };
 
@@ -605,7 +555,7 @@ function App() {
   const handleDownloadPreviewPdf = async () => {
     try {
       const canvas = await createPreviewCanvas();
-      downloadImagePdf(canvas, 'preview-output.pdf');
+      await downloadImagePdf(canvas, 'preview-output.pdf');
       showToast('Preview PDF downloaded');
     } catch {
       showToast('Preview PDF works for basic HTML');
