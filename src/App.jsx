@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Toolbar from './components/Toolbar.jsx';
 import Editor from './components/Editor.jsx';
 import StatsBar from './components/StatsBar.jsx';
@@ -8,6 +8,8 @@ import CodeEditor from './components/CodeEditor.jsx';
 
 const INITIAL_CONTENT =
   '<p>Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
+const INITIAL_TEXT = 'Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.';
+const STORAGE_KEY = 'simple-text-editor-session-v1';
 
 const INITIAL_CODE = `<!doctype html>
 <html lang="en">
@@ -198,6 +200,22 @@ const INITIAL_CODE = `<!doctype html>
 
 const getPlainText = (element) => element?.innerText || '';
 
+const getTextFromHtml = (html) => {
+  if (typeof document === 'undefined') return INITIAL_TEXT;
+
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  return container.innerText || '';
+};
+
+const getSavedSession = () => {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+};
+
 const getClipboardHtml = (element) => {
   const html = element?.innerHTML || '';
 
@@ -364,23 +382,54 @@ const getStats = (text) => {
 function App() {
   const editorRef = useRef(null);
   const previewRef = useRef(null);
-  const [content, setContent] = useState(INITIAL_CONTENT);
-  const [plainText, setPlainText] = useState('Start writing here. Select text to format it, or use the toolbar to shape your notes.');
+  const savedSession = useMemo(() => getSavedSession(), []);
+  const [content, setContent] = useState(savedSession.content || INITIAL_CONTENT);
+  const [plainText, setPlainText] = useState(savedSession.plainText || getTextFromHtml(savedSession.content || INITIAL_CONTENT));
   const [toast, setToast] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
-  const [mode, setMode] = useState('editor');
-  const [sourceLanguage, setSourceLanguage] = useState('auto');
-  const [targetLanguage, setTargetLanguage] = useState('hi');
-  const [translatorText, setTranslatorText] = useState('');
-  const [translatedText, setTranslatedText] = useState('');
+  const [mode, setMode] = useState(savedSession.mode || 'editor');
+  const [sourceLanguage, setSourceLanguage] = useState(savedSession.sourceLanguage || 'auto');
+  const [targetLanguage, setTargetLanguage] = useState(savedSession.targetLanguage || 'hi');
+  const [translatorText, setTranslatorText] = useState(savedSession.translatorText || '');
+  const [translatedText, setTranslatedText] = useState(savedSession.translatedText || '');
   const [isTranslating, setIsTranslating] = useState(false);
-  const [code, setCode] = useState(INITIAL_CODE);
-  const [codeLanguage, setCodeLanguage] = useState('html');
+  const [code, setCode] = useState(savedSession.code || INITIAL_CODE);
+  const [codeLanguage, setCodeLanguage] = useState(savedSession.codeLanguage || 'html');
   const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [previewPdfUrl, setPreviewPdfUrl] = useState('');
 
   const stats = useMemo(() => getStats(plainText), [plainText]);
+
+  useEffect(() => {
+    const session = {
+      content,
+      plainText,
+      mode,
+      sourceLanguage,
+      targetLanguage,
+      translatorText,
+      translatedText,
+      code,
+      codeLanguage
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } catch {
+      // Storage can fail in private mode or when the browser quota is full.
+    }
+  }, [code, codeLanguage, content, mode, plainText, sourceLanguage, targetLanguage, translatedText, translatorText]);
+
+  useEffect(() => {
+    setPreviewImageUrl('');
+    setPreviewPdfUrl('');
+  }, [code, codeLanguage]);
+
+  useEffect(() => () => {
+    if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
+    if (previewPdfUrl) URL.revokeObjectURL(previewPdfUrl);
+  }, [previewImageUrl, previewPdfUrl]);
 
   const showToast = (message) => {
     setToast(message);
@@ -546,18 +595,12 @@ function App() {
     showToast('Text downloaded');
   };
 
-  const handleToggleTranslator = () => {
-    const nextMode = mode === 'translator' ? 'editor' : 'translator';
-
+  const handleModeChange = (nextMode) => {
     if (nextMode === 'translator' && !translatorText.trim()) {
       setTranslatorText(getPlainText(editorRef.current));
     }
 
     setMode(nextMode);
-  };
-
-  const handleToggleCode = () => {
-    setMode((currentMode) => (currentMode === 'code' ? 'editor' : 'code'));
   };
 
   const handleUseEditorText = () => {
@@ -855,10 +898,38 @@ function App() {
     <main className="app-shell">
       <header className="app-header">
         <div>
+          <span className="app-kicker">Saved locally in this browser</span>
           <h1>Simple Text Editor</h1>
-          <p>Write, format, copy, paste, and download your text easily.</p>
+          <p>Write, translate, code, preview, and export from one polished workspace.</p>
         </div>
       </header>
+
+      <nav className="mode-switcher" aria-label="Workspace mode">
+        <button
+          className={mode === 'editor' ? 'mode-button active-mode' : 'mode-button'}
+          type="button"
+          onClick={() => handleModeChange('editor')}
+        >
+          <span>Editor</span>
+          <small>Rich text</small>
+        </button>
+        <button
+          className={mode === 'translator' ? 'mode-button active-mode' : 'mode-button'}
+          type="button"
+          onClick={() => handleModeChange('translator')}
+        >
+          <span>Translator</span>
+          <small>Indian languages</small>
+        </button>
+        <button
+          className={mode === 'code' ? 'mode-button active-mode' : 'mode-button'}
+          type="button"
+          onClick={() => handleModeChange('code')}
+        >
+          <span>Code Studio</span>
+          <small>Preview and export</small>
+        </button>
+      </nav>
 
       <section className="editor-card" aria-label="Text editor">
         <Toolbar
@@ -869,10 +940,7 @@ function App() {
           onPaste={handlePaste}
           onClear={handleClear}
           onDownload={handleDownload}
-          onToggleTranslator={handleToggleTranslator}
-          onToggleCode={handleToggleCode}
-          isTranslatorMode={mode === 'translator'}
-          isCodeMode={mode === 'code'}
+          isEditorMode={mode === 'editor'}
           searchQuery={searchQuery}
           onSearchQueryChange={(value) => {
             setSearchQuery(value);

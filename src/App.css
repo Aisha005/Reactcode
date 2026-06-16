@@ -1,6 +1,6 @@
 :root {
   color: #111827;
-  background: #f7f7f8;
+  background: #eef2f7;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -18,7 +18,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: #f7f7f8;
+  background: #eef2f7;
 }
 
 button,
@@ -36,20 +36,32 @@ button {
   width: min(1380px, calc(100% - 32px));
   min-height: 100vh;
   margin: 0 auto;
-  padding: 34px 0;
+  padding: 28px 0 40px;
 }
 
 .app-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.app-kicker {
+  display: inline-flex;
+  margin-bottom: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #374151;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .app-header h1 {
   margin: 0 0 8px;
   color: #111827;
-  font-size: 31px;
+  font-size: clamp(28px, 4vw, 42px);
   line-height: 1.1;
   letter-spacing: 0;
 }
@@ -58,27 +70,90 @@ button {
   max-width: 620px;
   margin: 0;
   color: #6b7280;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
+}
+
+.mode-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+  border: 1px solid #dbe1ea;
+  border-radius: 18px;
+  padding: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(17, 24, 39, 0.08);
+}
+
+.mode-button {
+  display: grid;
+  gap: 3px;
+  min-height: 58px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 10px 14px;
+  color: #4b5563;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease;
+}
+
+.mode-button span {
+  color: inherit;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.mode-button small {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.mode-button:hover {
+  border-color: #d1d5db;
+  background: #f8fafc;
+}
+
+.mode-button:active {
+  transform: translateY(1px);
+}
+
+.active-mode {
+  border-color: #111827;
+  color: #ffffff;
+  background: #111827;
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.2);
+}
+
+.active-mode small {
+  color: #d1d5db;
 }
 
 .editor-card {
   overflow: hidden;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  border: 1px solid #dbe1ea;
+  border-radius: 20px;
   background: #ffffff;
-  box-shadow: 0 18px 48px rgba(17, 24, 39, 0.09);
+  box-shadow: 0 22px 58px rgba(17, 24, 39, 0.1);
 }
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
-  background: #fbfbfc;
+  background: #f8fafc;
 }
 
 .toolbar-row {
@@ -90,7 +165,7 @@ button {
 }
 
 .toolbar-row-secondary {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   justify-content: flex-end;
 }
 
@@ -104,8 +179,8 @@ button {
 }
 
 .toolbar-section {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #dbe1ea;
+  border-radius: 14px;
   padding: 4px;
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
@@ -124,8 +199,8 @@ button {
 .search-box input {
   width: min(220px, 100%);
   height: 40px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #dbe1ea;
+  border-radius: 14px;
   padding: 0 14px;
   color: #111827;
   background: #ffffff;
@@ -145,11 +220,11 @@ button {
 .primary-action,
 .danger-action {
   display: inline-flex;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 13px;
   padding: 0;
   color: #111827;
   background: #ffffff;
@@ -163,8 +238,8 @@ button {
 }
 
 .button-icon {
-  width: 18px;
-  height: 18px;
+  width: 19px;
+  height: 19px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -174,8 +249,8 @@ button {
 
 .tool-button:hover,
 .action-button:hover {
-  background: #f3f4f6;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
+  background: #eef2f7;
+  box-shadow: inset 0 0 0 1px #cfd8e3;
 }
 
 .tool-button:active,
@@ -186,7 +261,8 @@ button {
 }
 
 .action-button {
-  background: #f3f4f6;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dbe1ea;
 }
 
 .active-action {
@@ -200,27 +276,29 @@ button {
 
 .primary-action {
   color: #ffffff;
-  background: #111827;
+  background: #0f172a;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
 }
 
 .primary-action:hover {
-  background: #374151;
+  background: #1f2937;
 }
 
 .danger-action {
   color: #ffffff;
-  background: #dc2626;
+  background: #b91c1c;
+  box-shadow: 0 10px 20px rgba(185, 28, 28, 0.16);
 }
 
 .danger-action:hover {
-  background: #b91c1c;
+  background: #991b1b;
 }
 
 .editor-surface {
-  min-height: 440px;
+  min-height: 500px;
   max-height: 62vh;
   overflow: auto;
-  padding: 30px;
+  padding: clamp(18px, 3vw, 34px);
   color: #111827;
   background: #ffffff;
   outline: none;
@@ -256,7 +334,7 @@ button {
   flex-direction: column;
   gap: 18px;
   min-height: 440px;
-  padding: 26px;
+  padding: clamp(18px, 3vw, 28px);
   background: #ffffff;
 }
 
@@ -301,8 +379,8 @@ button {
 .language-controls select {
   min-width: 170px;
   height: 40px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #dbe1ea;
+  border-radius: 14px;
   padding: 0 12px;
   color: #111827;
   background: #ffffff;
@@ -333,8 +411,8 @@ button {
 .translation-box textarea {
   min-height: 240px;
   resize: vertical;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
+  border: 1px solid #dbe1ea;
+  border-radius: 16px;
   padding: 16px;
   color: #111827;
   background: #fbfbfc;
@@ -349,9 +427,9 @@ button {
 
 .primary-text-button,
 .secondary-text-button {
-  min-height: 40px;
-  border-radius: 12px;
-  padding: 0 14px;
+  min-height: 42px;
+  border-radius: 14px;
+  padding: 0 16px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -364,20 +442,22 @@ button {
 
 .primary-text-button {
   color: #ffffff;
-  background: #111827;
+  background: #0f172a;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
 }
 
 .primary-text-button:hover {
-  background: #374151;
+  background: #1f2937;
 }
 
 .secondary-text-button {
   color: #111827;
-  background: #f3f4f6;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dbe1ea;
 }
 
 .secondary-text-button:hover {
-  background: #e5e7eb;
+  background: #eef2f7;
 }
 
 .primary-text-button:active,
@@ -394,7 +474,7 @@ button {
   flex-direction: column;
   gap: 18px;
   min-height: 440px;
-  padding: 26px;
+  padding: clamp(18px, 3vw, 28px);
   background: #ffffff;
 }
 
@@ -431,8 +511,8 @@ button {
 .code-language select {
   min-width: 160px;
   height: 40px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #dbe1ea;
+  border-radius: 14px;
   padding: 0 12px;
   color: #111827;
   background: #ffffff;
@@ -464,8 +544,8 @@ button {
 .code-box textarea {
   min-height: 560px;
   resize: vertical;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
+  border: 1px solid #dbe1ea;
+  border-radius: 16px;
   padding: 16px;
   color: #111827;
   background: #fbfbfc;
@@ -485,8 +565,8 @@ button {
   width: 100%;
   height: 560px;
   min-height: 560px;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
+  border: 1px solid #dbe1ea;
+  border-radius: 16px;
   background: #ffffff;
 }
 
@@ -510,6 +590,13 @@ button {
   align-items: center;
 }
 
+.code-actions .primary-text-button,
+.code-actions .secondary-text-button,
+.translator-actions .primary-text-button,
+.translator-actions .secondary-text-button {
+  min-width: 150px;
+}
+
 .generated-previews {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -519,8 +606,8 @@ button {
 .generated-preview-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
+  border: 1px solid #dbe1ea;
+  border-radius: 16px;
   background: #ffffff;
 }
 
@@ -566,7 +653,7 @@ button {
 }
 
 .stats-bar span {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #dbe1ea;
   border-radius: 999px;
   padding: 6px 10px;
   background: #f7f7f8;
@@ -587,6 +674,15 @@ button {
 }
 
 @media (max-width: 980px) {
+  .mode-switcher {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-button {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
   .toolbar {
     align-items: stretch;
   }
@@ -617,8 +713,13 @@ button {
 
 @media (max-width: 640px) {
   .app-shell {
-    width: min(100% - 20px, 1180px);
-    padding: 22px 0;
+    width: min(100% - 16px, 1380px);
+    padding: 16px 0 28px;
+  }
+
+  .app-kicker {
+    margin-bottom: 8px;
+    font-size: 11px;
   }
 
   .app-header h1 {
@@ -629,18 +730,43 @@ button {
     font-size: 14px;
   }
 
+  .mode-switcher {
+    gap: 7px;
+    border-radius: 16px;
+    padding: 7px;
+  }
+
+  .mode-button {
+    min-height: 50px;
+    border-radius: 12px;
+    padding: 9px 11px;
+  }
+
+  .mode-button span {
+    font-size: 14px;
+  }
+
+  .mode-button small {
+    font-size: 11px;
+  }
+
   .editor-card {
     border-radius: 14px;
   }
 
   .toolbar {
-    padding: 10px;
+    padding: 9px;
   }
 
   .toolbar-section,
   .toolbar-actions,
   .search-box {
     width: 100%;
+  }
+
+  .toolbar-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .search-box input {
@@ -651,8 +777,19 @@ button {
   .action-button,
   .primary-action,
   .danger-action {
-    width: 36px;
-    height: 36px;
+    width: 100%;
+    height: 40px;
+  }
+
+  .toolbar-section .tool-button {
+    flex: 1 1 40px;
+    width: auto;
+    min-width: 40px;
+  }
+
+  .search-box .tool-button {
+    flex: 0 0 46px;
+    width: 46px;
   }
 
   .editor-surface {
@@ -681,6 +818,12 @@ button {
     width: 100%;
   }
 
+  .language-controls,
+  .translator-actions,
+  .code-actions {
+    width: 100%;
+  }
+
   .translation-box textarea {
     min-height: 190px;
   }
@@ -694,6 +837,7 @@ button {
   .preview-box iframe,
   .preview-placeholder {
     min-height: 300px;
+    height: 300px;
   }
 
   .generated-preview-card img,

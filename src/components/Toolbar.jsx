@@ -179,10 +179,7 @@ function Toolbar({
   onPaste,
   onClear,
   onDownload,
-  onToggleTranslator,
-  onToggleCode,
-  isTranslatorMode,
-  isCodeMode,
+  isEditorMode,
   searchQuery,
   onSearchQueryChange,
   onFind
@@ -208,56 +205,46 @@ function Toolbar({
 
   return (
     <div className="toolbar">
-      <div className="toolbar-row">
-        <div className="toolbar-section" aria-label="Formatting controls">
-          {formatButtons.map((button) => (
-            <IconButton key={button.title} title={button.title} onClick={button.action}>
-              {button.icon}
-            </IconButton>
-          ))}
-        </div>
+      {isEditorMode && (
+        <div className="toolbar-row">
+          <div className="toolbar-section" aria-label="Formatting controls">
+            {formatButtons.map((button) => (
+              <IconButton key={button.title} title={button.title} onClick={button.action}>
+                {button.icon}
+              </IconButton>
+            ))}
+          </div>
 
-        <div className="toolbar-section" aria-label="Layout controls">
-          {structureButtons.map((button) => (
-            <IconButton key={button.title} title={button.title} onClick={button.action}>
-              {button.icon}
-            </IconButton>
-          ))}
+          <div className="toolbar-section" aria-label="Layout controls">
+            {structureButtons.map((button) => (
+              <IconButton key={button.title} title={button.title} onClick={button.action}>
+                {button.icon}
+              </IconButton>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="toolbar-row toolbar-row-secondary">
-        <div className="search-box">
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(event) => onSearchQueryChange(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') onFind();
-            }}
-            placeholder="Find text"
-            aria-label="Find text"
-          />
-          <IconButton title="Find text" onClick={onFind}>
-            {icons.search}
-          </IconButton>
-        </div>
+        {isEditorMode && (
+          <div className="search-box">
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => onSearchQueryChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') onFind();
+              }}
+              placeholder="Find text"
+              aria-label="Find text"
+            />
+            <IconButton title="Find text" onClick={onFind}>
+              {icons.search}
+            </IconButton>
+          </div>
+        )}
 
         <div className="toolbar-actions" aria-label="Editor actions">
-          <IconButton
-            className={`action-button ${isTranslatorMode ? 'active-action' : ''}`}
-            title={isTranslatorMode ? 'Switch to editor' : 'Switch to translator'}
-            onClick={onToggleTranslator}
-          >
-            {icons.translate}
-          </IconButton>
-          <IconButton
-            className={`action-button ${isCodeMode ? 'active-action' : ''}`}
-            title={isCodeMode ? 'Switch to editor' : 'Switch to code editor'}
-            onClick={onToggleCode}
-          >
-            {icons.code}
-          </IconButton>
           <IconButton className="action-button" title="Copy text" onClick={onCopy}>
             {icons.copy}
           </IconButton>
