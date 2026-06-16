@@ -9,6 +9,12 @@ const INITIAL_CONTENT =
 
 const getPlainText = (element) => element?.innerText || '';
 
+const getClipboardHtml = (element) => {
+  const html = element?.innerHTML || '';
+
+  return `<!doctype html><html><body>${html}</body></html>`;
+};
+
 const getStats = (text) => {
   const trimmed = text.trim();
   const words = trimmed ? trimmed.split(/\s+/).length : 0;
@@ -54,15 +60,44 @@ function App() {
   const handleParagraph = () => runCommand('formatBlock', 'p');
 
   const handleCopy = async () => {
-    const text = getPlainText(editorRef.current);
+    const editor = editorRef.current;
+    const text = getPlainText(editor);
+    const html = getClipboardHtml(editor);
 
     try {
+      if (window.ClipboardItem && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([text], { type: 'text/plain' })
+          })
+        ]);
+        showToast('Formatted text copied');
+        return;
+      }
+
       await navigator.clipboard.writeText(text);
-      showToast('Text copied');
+      showToast('Text copied without formatting');
     } catch {
       focusEditor();
+      const selection = window.getSelection();
+      const previousRanges = [];
+
+      for (let index = 0; index < selection.rangeCount; index += 1) {
+        previousRanges.push(selection.getRangeAt(index).cloneRange());
+      }
+
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      selection.removeAllRanges();
+      selection.addRange(range);
+
       const copied = document.execCommand('copy');
-      showToast(copied ? 'Text copied' : 'Copy is blocked by your browser');
+
+      selection.removeAllRanges();
+      previousRanges.forEach((previousRange) => selection.addRange(previousRange));
+
+      showToast(copied ? 'Formatted text copied' : 'Copy is blocked by your browser');
     }
   };
 
