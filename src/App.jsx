@@ -898,7 +898,6 @@ function App() {
     <main className="app-shell">
       <header className="app-header">
         <div>
-          <span className="app-kicker">Saved locally in this browser</span>
           <h1>CraftPad Studio</h1>
           <p>Write, translate, code, preview, and export from one polished workspace.</p>
         </div>
