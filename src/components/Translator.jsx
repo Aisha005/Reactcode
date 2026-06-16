@@ -1,6 +1,28 @@
 const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'hi', label: 'Hindi' },
+  { code: 'ta', label: 'Tamil' },
+  { code: 'te', label: 'Telugu' },
+  { code: 'kn', label: 'Kannada' },
+  { code: 'ml', label: 'Malayalam' },
+  { code: 'mr', label: 'Marathi' },
+  { code: 'bn', label: 'Bengali' },
+  { code: 'gu', label: 'Gujarati' },
+  { code: 'pa', label: 'Punjabi' },
+  { code: 'or', label: 'Odia' },
+  { code: 'as', label: 'Assamese' },
+  { code: 'ur', label: 'Urdu' },
+  { code: 'sa', label: 'Sanskrit' },
+  { code: 'ne', label: 'Nepali' },
+  { code: 'gom', label: 'Konkani' },
+  { code: 'mai', label: 'Maithili' },
+  { code: 'bho', label: 'Bhojpuri' },
+  { code: 'doi', label: 'Dogri' },
+  { code: 'mni-Mtei', label: 'Manipuri' },
+  { code: 'lus', label: 'Mizo' },
+  { code: 'sat', label: 'Santali' },
+  { code: 'sd', label: 'Sindhi' },
+  { code: 'ks', label: 'Kashmiri' },
   { code: 'es', label: 'Spanish' },
   { code: 'fr', label: 'French' },
   { code: 'de', label: 'German' },
@@ -11,6 +33,8 @@ const LANGUAGES = [
   { code: 'ko', label: 'Korean' },
   { code: 'zh', label: 'Chinese' }
 ];
+
+const SOURCE_LANGUAGES = [{ code: 'auto', label: 'Auto detect' }, ...LANGUAGES];
 
 function Translator({
   sourceLanguage,
@@ -43,7 +67,7 @@ function Translator({
         <label>
           <span>From</span>
           <select value={sourceLanguage} onChange={(event) => onSourceLanguageChange(event.target.value)}>
-            {LANGUAGES.map((language) => (
+            {SOURCE_LANGUAGES.map((language) => (
               <option key={language.code} value={language.code}>
                 {language.label}
               </option>

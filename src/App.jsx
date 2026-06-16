@@ -181,20 +181,71 @@ const getCodeExtension = (language) => {
   return extensions[language] || 'txt';
 };
 
-const createNativeTranslator = async (sourceLanguage, targetLanguage) => {
-  if (window.Translator?.create) {
-    return window.Translator.create({ sourceLanguage, targetLanguage });
+const splitTextForTranslation = (text, maxLength = 1400) => {
+  const chunks = [];
+  let currentChunk = '';
+
+  text.split(/(\n+)/).forEach((part) => {
+    if ((currentChunk + part).length > maxLength && currentChunk) {
+      chunks.push(currentChunk);
+      currentChunk = part;
+      return;
+    }
+
+    currentChunk += part;
+  });
+
+  if (currentChunk) chunks.push(currentChunk);
+  return chunks;
+};
+
+const translateWithGoogle = async (text, sourceLanguage, targetLanguage) => {
+  const source = sourceLanguage === 'auto' ? 'auto' : sourceLanguage;
+  const translatedChunks = await Promise.all(
+    splitTextForTranslation(text).map(async (chunk) => {
+      const params = new URLSearchParams({
+        client: 'gtx',
+        sl: source,
+        tl: targetLanguage,
+        dt: 't',
+        q: chunk
+      });
+      const response = await fetch(`https://translate.googleapis.com/translate_a/single?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error('Google translation failed');
+      }
+
+      const data = await response.json();
+      return data?.[0]?.map((segment) => segment?.[0] || '').join('') || '';
+    })
+  );
+
+  return translatedChunks.join('');
+};
+
+const translateWithMyMemory = async (text, sourceLanguage, targetLanguage) => {
+  const source = sourceLanguage === 'auto' ? 'en' : sourceLanguage;
+  const params = new URLSearchParams({
+    q: text.slice(0, 4500),
+    langpair: `${source}|${targetLanguage}`
+  });
+  const response = await fetch(`https://api.mymemory.translated.net/get?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error('MyMemory translation failed');
   }
 
-  if (window.ai?.translator?.create) {
-    return window.ai.translator.create({ sourceLanguage, targetLanguage });
-  }
+  const data = await response.json();
+  return data?.responseData?.translatedText || '';
+};
 
-  if (window.translation?.createTranslator) {
-    return window.translation.createTranslator({ sourceLanguage, targetLanguage });
+const translateText = async (text, sourceLanguage, targetLanguage) => {
+  try {
+    return await translateWithGoogle(text, sourceLanguage, targetLanguage);
+  } catch {
+    return translateWithMyMemory(text, sourceLanguage, targetLanguage);
   }
-
-  return null;
 };
 
 const getStats = (text) => {
@@ -215,7 +266,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
   const [mode, setMode] = useState('editor');
-  const [sourceLanguage, setSourceLanguage] = useState('en');
+  const [sourceLanguage, setSourceLanguage] = useState('auto');
   const [targetLanguage, setTargetLanguage] = useState('hi');
   const [translatorText, setTranslatorText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
@@ -425,18 +476,11 @@ function App() {
     setIsTranslating(true);
 
     try {
-      const translator = await createNativeTranslator(sourceLanguage, targetLanguage);
-
-      if (!translator?.translate) {
-        showToast('Browser translation is not available');
-        return;
-      }
-
-      const result = await translator.translate(translatorText);
+      const result = await translateText(translatorText, sourceLanguage, targetLanguage);
       setTranslatedText(result);
       showToast('Text translated');
     } catch {
-      showToast('Translation is not available in this browser');
+      showToast('Translation service is unavailable');
     } finally {
       setIsTranslating(false);
     }
