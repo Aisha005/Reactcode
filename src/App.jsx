@@ -14,32 +14,184 @@ const INITIAL_CODE = `<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Preview</title>
+    <title>Studio Landing Preview</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #f7f7f8;
-        color: #111827;
-        font-family: Arial, sans-serif;
+        color: #101828;
+        font-family: Inter, Arial, sans-serif;
+        background-color: #eef2f7;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='960' viewBox='0 0 1440 960'%3E%3Crect width='1440' height='960' fill='%23eef2f7'/%3E%3Ccircle cx='1160' cy='150' r='220' fill='%239bd5ff' opacity='.55'/%3E%3Ccircle cx='210' cy='760' r='260' fill='%23f9c6a7' opacity='.7'/%3E%3Cpath d='M0 190C190 110 330 120 510 205c194 92 384 95 568-8 138-77 244-92 362-55v818H0z' fill='%23ffffff' opacity='.55'/%3E%3Cpath d='M870 520c170-110 345-91 516 58v382H742c-5-177 38-324 128-440z' fill='%2393c5fd' opacity='.35'/%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: center;
       }
 
-      .card {
-        width: min(520px, calc(100% - 32px));
-        padding: 32px;
+      .page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1.05fr .95fr;
+        gap: 40px;
+        align-items: center;
+        width: min(1180px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .hero {
+        display: grid;
+        gap: 22px;
+      }
+
+      .eyebrow {
+        width: fit-content;
+        border: 1px solid rgba(16, 24, 40, .12);
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, .74);
+        color: #344054;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 720px;
+        color: #101828;
+        font-size: clamp(42px, 7vw, 82px);
+        line-height: .96;
+        letter-spacing: -1px;
+      }
+
+      p {
+        max-width: 590px;
+        margin: 0;
+        color: #475467;
+        font-size: 18px;
+        line-height: 1.7;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        border: 0;
+        border-radius: 14px;
+        padding: 14px 18px;
+        color: #ffffff;
+        background: #111827;
+        font-weight: 800;
+        box-shadow: 0 14px 28px rgba(17, 24, 39, .18);
+      }
+
+      .button.secondary {
+        color: #111827;
+        background: #ffffff;
+      }
+
+      .visual-card {
+        position: relative;
+        overflow: hidden;
+        min-height: 560px;
+        border: 1px solid rgba(255, 255, 255, .75);
+        border-radius: 34px;
+        background: rgba(255, 255, 255, .72);
+        box-shadow: 0 30px 80px rgba(17, 24, 39, .2);
+        backdrop-filter: blur(16px);
+      }
+
+      .photo {
+        position: absolute;
+        inset: 22px 22px 150px;
+        border-radius: 26px;
+        background-color: #111827;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='760' height='520' viewBox='0 0 760 520'%3E%3Crect width='760' height='520' fill='%23111827'/%3E%3Ccircle cx='590' cy='120' r='100' fill='%23facc15'/%3E%3Ccircle cx='170' cy='130' r='72' fill='%236ee7b7'/%3E%3Cpath d='M0 382l160-142 114 96 86-78 166 136 92-74 142 104v96H0z' fill='%23dbeafe'/%3E%3Cpath d='M0 430l190-148 152 118 82-76 156 124 180-132v204H0z' fill='%2393c5fd'/%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .metrics {
+        position: absolute;
+        right: 28px;
+        bottom: 28px;
+        left: 28px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .metric {
         border: 1px solid #e5e7eb;
         border-radius: 18px;
+        padding: 18px;
         background: #ffffff;
-        box-shadow: 0 16px 36px rgba(17, 24, 39, 0.1);
+      }
+
+      .metric strong {
+        display: block;
+        color: #111827;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 8px;
+        color: #667085;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      @media (max-width: 820px) {
+        .page {
+          grid-template-columns: 1fr;
+        }
+
+        .visual-card {
+          min-height: 460px;
+        }
       }
     </style>
   </head>
   <body>
-    <main class="card">
-      <h1>Hello from HTML preview</h1>
-      <p>Edit this HTML and export the rendered preview as an image or PDF.</p>
+    <main class="page">
+      <section class="hero">
+        <div class="eyebrow">Design studio template</div>
+        <h1>Build launch pages that look ready for investors.</h1>
+        <p>
+          This starter HTML uses a self-contained image-style background, polished cards,
+          responsive layout, and export-friendly CSS for clean preview downloads.
+        </p>
+        <div class="actions">
+          <button class="button">Start project</button>
+          <button class="button secondary">View portfolio</button>
+        </div>
+      </section>
+
+      <section class="visual-card" aria-label="Project preview">
+        <div class="photo"></div>
+        <div class="metrics">
+          <div class="metric">
+            <strong>92%</strong>
+            <span>Conversion lift</span>
+          </div>
+          <div class="metric">
+            <strong>18k</strong>
+            <span>Visitors</span>
+          </div>
+          <div class="metric">
+            <strong>4.9</strong>
+            <span>Rating</span>
+          </div>
+        </div>
+      </section>
     </main>
   </body>
 </html>`;
@@ -101,7 +253,7 @@ const downloadTextPdf = async (text, filename) => {
   pdf.save(filename);
 };
 
-const downloadImagePdf = async (canvas, filename) => {
+const createImagePdfBlob = async (canvas) => {
   const { jsPDF } = await import('jspdf');
   const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
   const pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
@@ -115,7 +267,11 @@ const downloadImagePdf = async (canvas, filename) => {
   const y = (pageHeight - imageHeight) / 2;
 
   pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imageWidth, imageHeight);
-  pdf.save(filename);
+  return pdf.output('blob');
+};
+
+const downloadImagePdf = async (canvas, filename) => {
+  downloadBlob(await createImagePdfBlob(canvas), filename);
 };
 
 const getCodeExtension = (language) => {
@@ -221,6 +377,8 @@ function App() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [code, setCode] = useState(INITIAL_CODE);
   const [codeLanguage, setCodeLanguage] = useState('html');
+  const [previewImageUrl, setPreviewImageUrl] = useState('');
+  const [previewPdfUrl, setPreviewPdfUrl] = useState('');
 
   const stats = useMemo(() => getStats(plainText), [plainText]);
 
@@ -489,7 +647,8 @@ function App() {
 
         try {
           const { default: html2canvas } = await import('html2canvas');
-          const canvas = await html2canvas(previewBody, {
+          await previewDocument.fonts?.ready;
+          const canvas = await html2canvas(previewRoot, {
             backgroundColor: '#ffffff',
             width,
             height,
@@ -508,9 +667,9 @@ function App() {
       };
 
       if (previewDocument.readyState === 'complete') {
-        window.requestAnimationFrame(capture);
+        window.setTimeout(() => window.requestAnimationFrame(capture), 120);
       } else {
-        iframe.addEventListener('load', () => window.requestAnimationFrame(capture), { once: true });
+        iframe.addEventListener('load', () => window.setTimeout(() => window.requestAnimationFrame(capture), 120), { once: true });
       }
     });
 
@@ -535,6 +694,24 @@ function App() {
     showToast('Code PDF downloaded');
   };
 
+  const handlePreviewImage = async () => {
+    try {
+      const canvas = await createPreviewCanvas();
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          showToast('Preview image failed');
+          return;
+        }
+
+        if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
+        setPreviewImageUrl(URL.createObjectURL(blob));
+        showToast('Image preview ready');
+      }, 'image/png');
+    } catch {
+      showToast('Image preview failed');
+    }
+  };
+
   const handleDownloadPreviewImage = async () => {
     try {
       const canvas = await createPreviewCanvas();
@@ -548,7 +725,20 @@ function App() {
         showToast('Preview image downloaded');
       }, 'image/png');
     } catch {
-      showToast('Preview image works for basic HTML');
+      showToast('Preview image failed');
+    }
+  };
+
+  const handlePreviewPdf = async () => {
+    try {
+      const canvas = await createPreviewCanvas();
+      const blob = await createImagePdfBlob(canvas);
+
+      if (previewPdfUrl) URL.revokeObjectURL(previewPdfUrl);
+      setPreviewPdfUrl(URL.createObjectURL(blob));
+      showToast('PDF preview ready');
+    } catch {
+      showToast('PDF preview failed');
     }
   };
 
@@ -558,7 +748,7 @@ function App() {
       await downloadImagePdf(canvas, 'preview-output.pdf');
       showToast('Preview PDF downloaded');
     } catch {
-      showToast('Preview PDF works for basic HTML');
+      showToast('Preview PDF failed');
     }
   };
 
@@ -722,8 +912,12 @@ function App() {
             onLanguageChange={setCodeLanguage}
             onDownloadCode={handleDownloadCode}
             onDownloadCodePdf={handleDownloadCodePdf}
+            onPreviewImage={handlePreviewImage}
             onDownloadPreviewImage={handleDownloadPreviewImage}
+            onPreviewPdf={handlePreviewPdf}
             onDownloadPreviewPdf={handleDownloadPreviewPdf}
+            previewImageUrl={previewImageUrl}
+            previewPdfUrl={previewPdfUrl}
           />
         )}
 

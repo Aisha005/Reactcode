@@ -13,8 +13,12 @@ function CodeEditor({
   onLanguageChange,
   onDownloadCode,
   onDownloadCodePdf,
+  onPreviewImage,
   onDownloadPreviewImage,
-  onDownloadPreviewPdf
+  onPreviewPdf,
+  onDownloadPreviewPdf,
+  previewImageUrl,
+  previewPdfUrl
 }) {
   return (
     <section className="code-panel" aria-label="Code editor">
@@ -66,13 +70,47 @@ function CodeEditor({
         <button className="secondary-text-button" type="button" onClick={onDownloadCodePdf}>
           Code PDF
         </button>
+        <button className="secondary-text-button" type="button" onClick={onPreviewImage}>
+          Preview image
+        </button>
         <button className="secondary-text-button" type="button" onClick={onDownloadPreviewImage}>
           Download preview image
+        </button>
+        <button className="secondary-text-button" type="button" onClick={onPreviewPdf}>
+          Preview PDF
         </button>
         <button className="primary-text-button" type="button" onClick={onDownloadPreviewPdf}>
           Download preview PDF
         </button>
       </div>
+
+      {(previewImageUrl || previewPdfUrl) && (
+        <div className="generated-previews">
+          {previewImageUrl && (
+            <div className="generated-preview-card">
+              <div className="generated-preview-header">
+                <span>Generated image preview</span>
+                <a href={previewImageUrl} download="preview-output.png">
+                  Download PNG
+                </a>
+              </div>
+              <img src={previewImageUrl} alt="Generated preview output" />
+            </div>
+          )}
+
+          {previewPdfUrl && (
+            <div className="generated-preview-card">
+              <div className="generated-preview-header">
+                <span>Generated PDF preview</span>
+                <a href={previewPdfUrl} download="preview-output.pdf">
+                  Download PDF
+                </a>
+              </div>
+              <iframe title="Generated PDF preview" src={previewPdfUrl} />
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
