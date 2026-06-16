@@ -141,6 +141,13 @@ const icons = {
       <path d="M15 17h4" />
     </Icon>
   ),
+  code: (
+    <Icon>
+      <path d="m8 9-4 3 4 3" />
+      <path d="m16 9 4 3-4 3" />
+      <path d="m14 5-4 14" />
+    </Icon>
+  ),
   search: (
     <Icon>
       <circle cx="11" cy="11" r="6" />
@@ -173,7 +180,9 @@ function Toolbar({
   onClear,
   onDownload,
   onToggleTranslator,
+  onToggleCode,
   isTranslatorMode,
+  isCodeMode,
   searchQuery,
   onSearchQueryChange,
   onFind
@@ -241,6 +250,13 @@ function Toolbar({
             onClick={onToggleTranslator}
           >
             {icons.translate}
+          </IconButton>
+          <IconButton
+            className={`action-button ${isCodeMode ? 'active-action' : ''}`}
+            title={isCodeMode ? 'Switch to editor' : 'Switch to code editor'}
+            onClick={onToggleCode}
+          >
+            {icons.code}
           </IconButton>
           <IconButton className="action-button" title="Copy text" onClick={onCopy}>
             {icons.copy}

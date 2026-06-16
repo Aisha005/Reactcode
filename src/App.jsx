@@ -4,9 +4,45 @@ import Editor from './components/Editor.jsx';
 import StatsBar from './components/StatsBar.jsx';
 import Toast from './components/Toast.jsx';
 import Translator from './components/Translator.jsx';
+import CodeEditor from './components/CodeEditor.jsx';
 
 const INITIAL_CONTENT =
   '<p>Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
+
+const INITIAL_CODE = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preview</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f7f7f8;
+        color: #111827;
+        font-family: Arial, sans-serif;
+      }
+
+      .card {
+        width: min(520px, calc(100% - 32px));
+        padding: 32px;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 16px 36px rgba(17, 24, 39, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Hello from HTML preview</h1>
+      <p>Edit this HTML and export the rendered preview as an image or PDF.</p>
+    </main>
+  </body>
+</html>`;
 
 const getPlainText = (element) => element?.innerText || '';
 
@@ -21,6 +57,129 @@ const textToHtml = (text) =>
     .split(/\n{2,}/)
     .map((paragraph) => `<p>${paragraph.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>`)
     .join('');
+
+const escapePdfText = (text) => text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+
+const downloadBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+const downloadTextFile = (text, filename, type = 'text/plain;charset=utf-8') => {
+  downloadBlob(new Blob([text], { type }), filename);
+};
+
+const binaryStringToBlob = (content, type) => {
+  const bytes = new Uint8Array(content.length);
+
+  for (let index = 0; index < content.length; index += 1) {
+    bytes[index] = content.charCodeAt(index) & 0xff;
+  }
+
+  return new Blob([bytes], { type });
+};
+
+const buildPdf = (objects) => {
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+
+  objects.forEach((object, index) => {
+    offsets[index + 1] = pdf.length;
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+
+  const xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => {
+    pdf += `${String(offset).padStart(10, '0')} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+  return binaryStringToBlob(pdf, 'application/pdf');
+};
+
+const downloadTextPdf = (text, filename) => {
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const margin = 36;
+  const lineHeight = 13;
+  const maxChars = 86;
+  const maxLines = Math.floor((pageHeight - margin * 2) / lineHeight);
+  const lines = text.split('\n').flatMap((line) => {
+    if (!line) return [''];
+    const wrapped = [];
+
+    for (let index = 0; index < line.length; index += maxChars) {
+      wrapped.push(line.slice(index, index + maxChars));
+    }
+
+    return wrapped;
+  });
+  const pages = [];
+
+  for (let index = 0; index < lines.length; index += maxLines) {
+    pages.push(lines.slice(index, index + maxLines));
+  }
+
+  const objects = [];
+  const pageRefs = pages.map((_, index) => `${4 + index * 2} 0 R`).join(' ');
+  objects.push('<< /Type /Catalog /Pages 2 0 R >>');
+  objects.push(`<< /Type /Pages /Kids [${pageRefs}] /Count ${pages.length} >>`);
+  objects.push('<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>');
+
+  pages.forEach((pageLines, index) => {
+    const pageObjectNumber = 4 + index * 2;
+    const contentObjectNumber = pageObjectNumber + 1;
+    const stream = `BT /F1 10 Tf ${margin} ${pageHeight - margin} Td ${lineHeight} TL ${pageLines
+      .map((line) => `(${escapePdfText(line)}) Tj T*`)
+      .join(' ')} ET`;
+
+    objects.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObjectNumber} 0 R >>`
+    );
+    objects.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+  });
+
+  downloadBlob(buildPdf(objects), filename);
+};
+
+const downloadImagePdf = (canvas, filename) => {
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const margin = 32;
+  const scale = Math.min((pageWidth - margin * 2) / canvas.width, (pageHeight - margin * 2) / canvas.height);
+  const imageWidth = canvas.width * scale;
+  const imageHeight = canvas.height * scale;
+  const x = (pageWidth - imageWidth) / 2;
+  const y = (pageHeight - imageHeight) / 2;
+  const jpegBinary = atob(canvas.toDataURL('image/jpeg', 0.94).split(',')[1]);
+  const content = `q ${imageWidth.toFixed(2)} 0 0 ${imageHeight.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm /Im1 Do Q`;
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>`,
+    `<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBinary.length} >>\nstream\n${jpegBinary}\nendstream`,
+    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`
+  ];
+
+  downloadBlob(buildPdf(objects), filename);
+};
+
+const getCodeExtension = (language) => {
+  const extensions = {
+    html: 'html',
+    css: 'css',
+    javascript: 'js',
+    text: 'txt'
+  };
+
+  return extensions[language] || 'txt';
+};
 
 const createNativeTranslator = async (sourceLanguage, targetLanguage) => {
   if (window.Translator?.create) {
@@ -49,6 +208,7 @@ const getStats = (text) => {
 
 function App() {
   const editorRef = useRef(null);
+  const previewRef = useRef(null);
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [plainText, setPlainText] = useState('Start writing here. Select text to format it, or use the toolbar to shape your notes.');
   const [toast, setToast] = useState('');
@@ -60,6 +220,8 @@ function App() {
   const [translatorText, setTranslatorText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
+  const [code, setCode] = useState(INITIAL_CODE);
+  const [codeLanguage, setCodeLanguage] = useState('html');
 
   const stats = useMemo(() => getStats(plainText), [plainText]);
 
@@ -80,6 +242,8 @@ function App() {
   };
 
   const runCommand = (command, value = null) => {
+    if (mode !== 'editor') return;
+
     focusEditor();
     document.execCommand(command, false, value);
     syncEditorState();
@@ -89,6 +253,17 @@ function App() {
   const handleParagraph = () => runCommand('formatBlock', 'p');
 
   const handleCopy = async () => {
+    if (mode === 'code') {
+      try {
+        await navigator.clipboard.writeText(code);
+        showToast('Code copied');
+      } catch {
+        showToast('Copy is blocked by your browser');
+      }
+
+      return;
+    }
+
     if (mode === 'translator') {
       const text = translatedText.trim() ? translatedText : translatorText;
 
@@ -158,6 +333,12 @@ function App() {
         return;
       }
 
+      if (mode === 'code') {
+        setCode((currentCode) => `${currentCode}${currentCode ? '\n' : ''}${text}`);
+        showToast('Text pasted into code editor');
+        return;
+      }
+
       focusEditor();
       document.execCommand('insertText', false, text);
       syncEditorState();
@@ -169,6 +350,12 @@ function App() {
   };
 
   const handleClear = () => {
+    if (mode === 'code') {
+      setCode('');
+      showToast('Code editor cleared');
+      return;
+    }
+
     if (mode === 'translator') {
       setTranslatorText('');
       setTranslatedText('');
@@ -184,6 +371,11 @@ function App() {
   };
 
   const handleDownload = () => {
+    if (mode === 'code') {
+      handleDownloadCode();
+      return;
+    }
+
     const text = mode === 'translator'
       ? translatedText || translatorText
       : getPlainText(editorRef.current);
@@ -193,25 +385,22 @@ function App() {
       return;
     }
 
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = mode === 'translator' ? 'translated-text.txt' : 'simple-text-editor.txt';
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadTextFile(text, mode === 'translator' ? 'translated-text.txt' : 'simple-text-editor.txt');
     showToast('Text downloaded');
   };
 
   const handleToggleTranslator = () => {
-    const nextMode = mode === 'editor' ? 'translator' : 'editor';
+    const nextMode = mode === 'translator' ? 'editor' : 'translator';
 
     if (nextMode === 'translator' && !translatorText.trim()) {
       setTranslatorText(getPlainText(editorRef.current));
     }
 
     setMode(nextMode);
+  };
+
+  const handleToggleCode = () => {
+    setMode((currentMode) => (currentMode === 'code' ? 'editor' : 'code'));
   };
 
   const handleUseEditorText = () => {
@@ -283,6 +472,100 @@ function App() {
       }
     });
     showToast('Translation inserted');
+  };
+
+  const createPreviewCanvas = () =>
+    new Promise((resolve, reject) => {
+      if (codeLanguage !== 'html') {
+        reject(new Error('Preview export is available for HTML only'));
+        return;
+      }
+
+      const iframe = previewRef.current;
+      const width = Math.max(800, iframe?.clientWidth || 800);
+      const height = Math.max(520, iframe?.clientHeight || 520);
+      const previewDocument = iframe?.contentDocument;
+      const styleTags = Array.from(previewDocument?.head?.querySelectorAll('style') || [])
+        .map((style) => style.outerHTML)
+        .join('');
+      const bodyHtml = previewDocument?.body?.innerHTML || code;
+      const bodyStyle = previewDocument?.body?.getAttribute('style') || '';
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <foreignObject width="100%" height="100%">
+          <html xmlns="http://www.w3.org/1999/xhtml">
+            <head>${styleTags}</head>
+            <body style="width:${width}px;height:${height}px;margin:0;background:#ffffff;${bodyStyle}">
+              ${bodyHtml}
+            </body>
+          </html>
+        </foreignObject>
+      </svg>`;
+      const image = new Image();
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      canvas.width = width;
+      canvas.height = height;
+      image.onload = () => {
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0);
+        URL.revokeObjectURL(image.src);
+        resolve(canvas);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(image.src);
+        reject(new Error('Preview capture failed'));
+      };
+      image.src = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+    });
+
+  const handleDownloadCode = () => {
+    if (!code.trim()) {
+      showToast('No code to download');
+      return;
+    }
+
+    const extension = getCodeExtension(codeLanguage);
+    downloadTextFile(code, `code-output.${extension}`, 'text/plain;charset=utf-8');
+    showToast('Code downloaded');
+  };
+
+  const handleDownloadCodePdf = () => {
+    if (!code.trim()) {
+      showToast('No code to export');
+      return;
+    }
+
+    downloadTextPdf(code, 'code-output.pdf');
+    showToast('Code PDF downloaded');
+  };
+
+  const handleDownloadPreviewImage = async () => {
+    try {
+      const canvas = await createPreviewCanvas();
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          showToast('Preview image failed');
+          return;
+        }
+
+        downloadBlob(blob, 'preview-output.png');
+        showToast('Preview image downloaded');
+      }, 'image/png');
+    } catch {
+      showToast('Preview image works for basic HTML');
+    }
+  };
+
+  const handleDownloadPreviewPdf = async () => {
+    try {
+      const canvas = await createPreviewCanvas();
+      downloadImagePdf(canvas, 'preview-output.pdf');
+      showToast('Preview PDF downloaded');
+    } catch {
+      showToast('Preview PDF works for basic HTML');
+    }
   };
 
   const findMatches = () => {
@@ -403,7 +686,9 @@ function App() {
           onClear={handleClear}
           onDownload={handleDownload}
           onToggleTranslator={handleToggleTranslator}
+          onToggleCode={handleToggleCode}
           isTranslatorMode={mode === 'translator'}
+          isCodeMode={mode === 'code'}
           searchQuery={searchQuery}
           onSearchQueryChange={(value) => {
             setSearchQuery(value);
@@ -419,7 +704,7 @@ function App() {
             onInput={handleEditorInput}
             onKeyDown={handleShortcut}
           />
-        ) : (
+        ) : mode === 'translator' ? (
           <Translator
             sourceLanguage={sourceLanguage}
             targetLanguage={targetLanguage}
@@ -433,6 +718,18 @@ function App() {
             onUseEditorText={handleUseEditorText}
             onCopyTranslation={handleCopyTranslation}
             onInsertTranslation={handleInsertTranslation}
+          />
+        ) : (
+          <CodeEditor
+            previewRef={previewRef}
+            code={code}
+            language={codeLanguage}
+            onCodeChange={setCode}
+            onLanguageChange={setCodeLanguage}
+            onDownloadCode={handleDownloadCode}
+            onDownloadCodePdf={handleDownloadCodePdf}
+            onDownloadPreviewImage={handleDownloadPreviewImage}
+            onDownloadPreviewPdf={handleDownloadPreviewPdf}
           />
         )}
 
