@@ -910,7 +910,7 @@ function App() {
           onClick={() => handleModeChange('editor')}
         >
           <span>Editor</span>
-          <small>Rich text</small>
+          
         </button>
         <button
           className={mode === 'translator' ? 'mode-button active-mode' : 'mode-button'}
@@ -918,6 +918,7 @@ function App() {
           onClick={() => handleModeChange('translator')}
         >
           <span>Translator</span>
+         
           
         </button>
         <button
@@ -926,7 +927,7 @@ function App() {
           onClick={() => handleModeChange('code')}
         >
           <span>Code Studio</span>
-          
+         
         </button>
       </nav>
 
