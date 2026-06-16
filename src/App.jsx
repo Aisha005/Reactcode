@@ -7,9 +7,9 @@ import Translator from './components/Translator.jsx';
 import CodeEditor from './components/CodeEditor.jsx';
 
 const INITIAL_CONTENT =
-  '<p>Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
-const INITIAL_TEXT = 'Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.';
-const STORAGE_KEY = 'simple-text-editor-session-v1';
+  '<p>Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
+const INITIAL_TEXT = 'Start writing here. Select text to format it, or use the toolbar to shape your notes.';
+const STORAGE_KEY = 'craftpad-studio-session-v1';
 
 const INITIAL_CODE = `<!doctype html>
 <html lang="en">
@@ -591,7 +591,7 @@ function App() {
       return;
     }
 
-    downloadTextFile(text, mode === 'translator' ? 'translated-text.txt' : 'simple-text-editor.txt');
+    downloadTextFile(text, mode === 'translator' ? 'translated-text.txt' : 'craftpad-studio.txt');
     showToast('Text downloaded');
   };
 
@@ -899,7 +899,7 @@ function App() {
       <header className="app-header">
         <div>
           <span className="app-kicker">Saved locally in this browser</span>
-          <h1>Simple Text Editor</h1>
+          <h1>CraftPad Studio</h1>
           <p>Write, translate, code, preview, and export from one polished workspace.</p>
         </div>
       </header>

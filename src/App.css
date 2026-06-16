@@ -1,6 +1,6 @@
 :root {
-  color: #111827;
-  background: #eef2f7;
+  color: #17211f;
+  background: #f2f5f1;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -18,7 +18,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: #eef2f7;
+  background: #f2f5f1;
 }
 
 button,
@@ -36,7 +36,7 @@ button {
   width: min(1380px, calc(100% - 32px));
   min-height: 100vh;
   margin: 0 auto;
-  padding: 28px 0 40px;
+  padding: 26px 0 38px;
 }
 
 .app-header {
@@ -49,18 +49,18 @@ button {
 .app-kicker {
   display: inline-flex;
   margin-bottom: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #cfd8cf;
   border-radius: 999px;
   padding: 7px 11px;
-  color: #374151;
-  background: #ffffff;
+  color: #49615a;
+  background: #fbfcfa;
   font-size: 12px;
   font-weight: 800;
 }
 
 .app-header h1 {
   margin: 0 0 8px;
-  color: #111827;
+  color: #17211f;
   font-size: clamp(28px, 4vw, 42px);
   line-height: 1.1;
   letter-spacing: 0;
@@ -69,32 +69,34 @@ button {
 .app-header p {
   max-width: 620px;
   margin: 0;
-  color: #6b7280;
+  color: #66766f;
   font-size: 16px;
   line-height: 1.6;
 }
 
 .mode-switcher {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
   margin-bottom: 14px;
-  border: 1px solid #dbe1ea;
-  border-radius: 18px;
-  padding: 8px;
-  background: #ffffff;
-  box-shadow: 0 14px 34px rgba(17, 24, 39, 0.08);
+  border: 1px solid #cfd8cf;
+  border-radius: 999px;
+  padding: 5px;
+  background: #fbfcfa;
+  box-shadow: 0 10px 26px rgba(23, 33, 31, 0.08);
 }
 
 .mode-button {
-  display: grid;
-  gap: 3px;
-  min-height: 58px;
+  display: inline-flex;
+  gap: 8px;
+  min-height: 38px;
+  align-items: center;
   border: 1px solid transparent;
-  border-radius: 14px;
-  padding: 10px 14px;
-  color: #4b5563;
-  background: #ffffff;
+  border-radius: 999px;
+  padding: 7px 12px;
+  color: #52645e;
+  background: transparent;
   cursor: pointer;
   text-align: left;
   transition:
@@ -107,19 +109,21 @@ button {
 
 .mode-button span {
   color: inherit;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 850;
 }
 
 .mode-button small {
-  color: #6b7280;
-  font-size: 12px;
+  color: #7b8a84;
+  font-size: 11px;
   font-weight: 650;
 }
 
 .mode-button:hover {
-  border-color: #d1d5db;
-  background: #f8fafc;
+  border-color: #c7d2c7;
+  color: #17211f;
+  background: #edf3ec;
+  box-shadow: inset 0 0 0 1px #d8e2d8;
 }
 
 .mode-button:active {
@@ -127,22 +131,28 @@ button {
 }
 
 .active-mode {
-  border-color: #111827;
+  border-color: #1f6f61;
   color: #ffffff;
-  background: #111827;
-  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.2);
+  background: #1f6f61;
+  box-shadow: 0 9px 18px rgba(31, 111, 97, 0.22);
+}
+
+.active-mode:hover {
+  border-color: #18584d;
+  color: #ffffff;
+  background: #18584d;
 }
 
 .active-mode small {
-  color: #d1d5db;
+  color: #dbeee9;
 }
 
 .editor-card {
   overflow: hidden;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #ced8d0;
   border-radius: 20px;
   background: #ffffff;
-  box-shadow: 0 22px 58px rgba(17, 24, 39, 0.1);
+  box-shadow: 0 22px 58px rgba(23, 33, 31, 0.1);
 }
 
 .toolbar {
@@ -152,8 +162,8 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-bottom: 1px solid #dfe6df;
+  background: #f7faf6;
 }
 
 .toolbar-row {
@@ -179,7 +189,7 @@ button {
 }
 
 .toolbar-section {
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 14px;
   padding: 4px;
   background: #ffffff;
@@ -199,10 +209,10 @@ button {
 .search-box input {
   width: min(220px, 100%);
   height: 40px;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 14px;
   padding: 0 14px;
-  color: #111827;
+  color: #17211f;
   background: #ffffff;
   outline: none;
   transition:
@@ -211,8 +221,8 @@ button {
 }
 
 .search-box input:focus {
-  border-color: #111827;
-  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+  border-color: #1f6f61;
+  box-shadow: 0 0 0 3px rgba(31, 111, 97, 0.12);
 }
 
 .tool-button,
@@ -226,7 +236,7 @@ button {
   justify-content: center;
   border-radius: 13px;
   padding: 0;
-  color: #111827;
+  color: #263734;
   background: #ffffff;
   cursor: pointer;
   line-height: 1;
@@ -249,8 +259,9 @@ button {
 
 .tool-button:hover,
 .action-button:hover {
-  background: #eef2f7;
-  box-shadow: inset 0 0 0 1px #cfd8e3;
+  color: #1f6f61;
+  background: #edf3ec;
+  box-shadow: inset 0 0 0 1px #c7d2c7;
 }
 
 .tool-button:active,
@@ -262,36 +273,38 @@ button {
 
 .action-button {
   background: #ffffff;
-  box-shadow: inset 0 0 0 1px #dbe1ea;
+  box-shadow: inset 0 0 0 1px #d5ded5;
 }
 
 .active-action {
   color: #ffffff;
-  background: #111827;
+  background: #1f6f61;
 }
 
 .active-action:hover {
-  background: #374151;
+  background: #18584d;
 }
 
 .primary-action {
   color: #ffffff;
-  background: #0f172a;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+  background: #1f6f61;
+  box-shadow: 0 10px 20px rgba(31, 111, 97, 0.2);
 }
 
 .primary-action:hover {
-  background: #1f2937;
+  background: #18584d;
+  box-shadow: 0 8px 16px rgba(31, 111, 97, 0.18);
 }
 
 .danger-action {
   color: #ffffff;
-  background: #b91c1c;
-  box-shadow: 0 10px 20px rgba(185, 28, 28, 0.16);
+  background: #a33d34;
+  box-shadow: 0 10px 20px rgba(163, 61, 52, 0.16);
 }
 
 .danger-action:hover {
-  background: #991b1b;
+  background: #85312a;
+  box-shadow: 0 8px 16px rgba(163, 61, 52, 0.14);
 }
 
 .editor-surface {
@@ -299,7 +312,7 @@ button {
   max-height: 62vh;
   overflow: auto;
   padding: clamp(18px, 3vw, 34px);
-  color: #111827;
+  color: #17211f;
   background: #ffffff;
   outline: none;
   font-size: 17px;
@@ -307,12 +320,12 @@ button {
 }
 
 .editor-surface:focus {
-  box-shadow: inset 0 0 0 2px rgba(17, 24, 39, 0.08);
+  box-shadow: inset 0 0 0 2px rgba(31, 111, 97, 0.1);
 }
 
 .editor-surface h2 {
   margin: 0 0 14px;
-  color: #111827;
+  color: #17211f;
   font-size: 26px;
   line-height: 1.25;
   letter-spacing: 0;
@@ -347,7 +360,7 @@ button {
 
 .translator-header h2 {
   margin: 0 0 6px;
-  color: #111827;
+  color: #17211f;
   font-size: 22px;
   line-height: 1.2;
   letter-spacing: 0;
@@ -355,7 +368,7 @@ button {
 
 .translator-header p {
   margin: 0;
-  color: #6b7280;
+  color: #66766f;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -371,7 +384,7 @@ button {
 .language-controls label {
   display: grid;
   gap: 6px;
-  color: #6b7280;
+  color: #66766f;
   font-size: 13px;
   font-weight: 650;
 }
@@ -379,18 +392,18 @@ button {
 .language-controls select {
   min-width: 170px;
   height: 40px;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 14px;
   padding: 0 12px;
-  color: #111827;
+  color: #17211f;
   background: #ffffff;
   outline: none;
 }
 
 .language-controls select:focus,
 .translation-box textarea:focus {
-  border-color: #111827;
-  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+  border-color: #1f6f61;
+  box-shadow: 0 0 0 3px rgba(31, 111, 97, 0.12);
 }
 
 .translator-grid {
@@ -403,7 +416,7 @@ button {
   display: grid;
   gap: 8px;
   min-width: 0;
-  color: #6b7280;
+  color: #66766f;
   font-size: 13px;
   font-weight: 650;
 }
@@ -411,11 +424,11 @@ button {
 .translation-box textarea {
   min-height: 240px;
   resize: vertical;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 16px;
   padding: 16px;
-  color: #111827;
-  background: #fbfbfc;
+  color: #17211f;
+  background: #fbfcfa;
   outline: none;
   font-size: 15px;
   font-weight: 400;
@@ -442,22 +455,25 @@ button {
 
 .primary-text-button {
   color: #ffffff;
-  background: #0f172a;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  background: #1f6f61;
+  box-shadow: 0 12px 24px rgba(31, 111, 97, 0.2);
 }
 
 .primary-text-button:hover {
-  background: #1f2937;
+  background: #18584d;
+  box-shadow: 0 10px 20px rgba(31, 111, 97, 0.18);
 }
 
 .secondary-text-button {
-  color: #111827;
+  color: #263734;
   background: #ffffff;
-  box-shadow: inset 0 0 0 1px #dbe1ea;
+  box-shadow: inset 0 0 0 1px #d5ded5;
 }
 
 .secondary-text-button:hover {
-  background: #eef2f7;
+  color: #1f6f61;
+  background: #edf3ec;
+  box-shadow: inset 0 0 0 1px #c7d2c7;
 }
 
 .primary-text-button:active,
@@ -487,7 +503,7 @@ button {
 
 .code-header h2 {
   margin: 0 0 6px;
-  color: #111827;
+  color: #17211f;
   font-size: 22px;
   line-height: 1.2;
   letter-spacing: 0;
@@ -495,7 +511,7 @@ button {
 
 .code-header p {
   margin: 0;
-  color: #6b7280;
+  color: #66766f;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -503,7 +519,7 @@ button {
 .code-language {
   display: grid;
   gap: 6px;
-  color: #6b7280;
+  color: #66766f;
   font-size: 13px;
   font-weight: 650;
 }
@@ -511,18 +527,18 @@ button {
 .code-language select {
   min-width: 160px;
   height: 40px;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 14px;
   padding: 0 12px;
-  color: #111827;
+  color: #17211f;
   background: #ffffff;
   outline: none;
 }
 
 .code-language select:focus,
 .code-box textarea:focus {
-  border-color: #111827;
-  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+  border-color: #1f6f61;
+  box-shadow: 0 0 0 3px rgba(31, 111, 97, 0.12);
 }
 
 .code-grid {
@@ -536,7 +552,7 @@ button {
   display: grid;
   gap: 8px;
   min-width: 0;
-  color: #6b7280;
+  color: #66766f;
   font-size: 13px;
   font-weight: 650;
 }
@@ -544,11 +560,11 @@ button {
 .code-box textarea {
   min-height: 560px;
   resize: vertical;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 16px;
   padding: 16px;
-  color: #111827;
-  background: #fbfbfc;
+  color: #17211f;
+  background: #fbfcfa;
   outline: none;
   font-family: "Cascadia Code", Consolas, "SFMono-Regular", monospace;
   font-size: 14px;
@@ -565,7 +581,7 @@ button {
   width: 100%;
   height: 560px;
   min-height: 560px;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 16px;
   background: #ffffff;
 }
@@ -578,7 +594,7 @@ button {
   display: grid;
   place-items: center;
   padding: 22px;
-  color: #6b7280;
+  color: #66766f;
   text-align: center;
   line-height: 1.5;
 }
@@ -606,7 +622,7 @@ button {
 .generated-preview-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 16px;
   background: #ffffff;
 }
@@ -617,14 +633,14 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
+  border-bottom: 1px solid #dfe6df;
+  color: #66766f;
   font-size: 13px;
   font-weight: 700;
 }
 
 .generated-preview-header a {
-  color: #111827;
+  color: #1f6f61;
   text-decoration: none;
 }
 
@@ -635,7 +651,7 @@ button {
   height: 380px;
   border: 0;
   object-fit: contain;
-  background: #f7f7f8;
+  background: #f2f5f1;
 }
 
 .stats-bar {
@@ -646,17 +662,17 @@ button {
   justify-content: flex-end;
   min-height: 52px;
   padding: 12px 18px;
-  border-top: 1px solid #e5e7eb;
-  color: #6b7280;
+  border-top: 1px solid #dfe6df;
+  color: #66766f;
   background: #ffffff;
   font-size: 14px;
 }
 
 .stats-bar span {
-  border: 1px solid #dbe1ea;
+  border: 1px solid #d5ded5;
   border-radius: 999px;
   padding: 6px 10px;
-  background: #f7f7f8;
+  background: #f7faf6;
 }
 
 .toast {
@@ -667,20 +683,22 @@ button {
   border-radius: 999px;
   padding: 12px 16px;
   color: #ffffff;
-  background: #111827;
-  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.24);
+  background: #1f6f61;
+  box-shadow: 0 12px 32px rgba(31, 111, 97, 0.24);
   font-size: 14px;
   font-weight: 650;
 }
 
 @media (max-width: 980px) {
   .mode-switcher {
-    grid-template-columns: 1fr;
+    display: flex;
+    width: 100%;
   }
 
   .mode-button {
-    grid-template-columns: 1fr auto;
-    align-items: center;
+    flex: 1 1 0;
+    justify-content: center;
+    text-align: center;
   }
 
   .toolbar {
@@ -731,23 +749,27 @@ button {
   }
 
   .mode-switcher {
-    gap: 7px;
-    border-radius: 16px;
-    padding: 7px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    border-radius: 999px;
+    padding: 4px;
   }
 
   .mode-button {
-    min-height: 50px;
-    border-radius: 12px;
-    padding: 9px 11px;
+    min-height: 36px;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 7px 8px;
+    text-align: center;
   }
 
   .mode-button span {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .mode-button small {
-    font-size: 11px;
+    display: none;
   }
 
   .editor-card {
@@ -767,6 +789,7 @@ button {
   .toolbar-actions {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
   }
 
   .search-box input {
@@ -778,18 +801,24 @@ button {
   .primary-action,
   .danger-action {
     width: 100%;
-    height: 40px;
+    height: 36px;
+    border-radius: 11px;
   }
 
   .toolbar-section .tool-button {
-    flex: 1 1 40px;
+    flex: 1 1 36px;
     width: auto;
-    min-width: 40px;
+    min-width: 36px;
   }
 
   .search-box .tool-button {
-    flex: 0 0 46px;
-    width: 46px;
+    flex: 0 0 40px;
+    width: 40px;
+  }
+
+  .button-icon {
+    width: 17px;
+    height: 17px;
   }
 
   .editor-surface {
@@ -822,6 +851,23 @@ button {
   .translator-actions,
   .code-actions {
     width: 100%;
+  }
+
+  .translator-actions,
+  .code-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .code-actions .primary-text-button,
+  .code-actions .secondary-text-button,
+  .translator-actions .primary-text-button,
+  .translator-actions .secondary-text-button {
+    min-width: 0;
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 12px;
   }
 
   .translation-box textarea {
