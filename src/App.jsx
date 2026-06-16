@@ -3,6 +3,7 @@ import Toolbar from './components/Toolbar.jsx';
 import Editor from './components/Editor.jsx';
 import StatsBar from './components/StatsBar.jsx';
 import Toast from './components/Toast.jsx';
+import Translator from './components/Translator.jsx';
 
 const INITIAL_CONTENT =
   '<p>Kiddoo...... Start writing here. Select text to format it, or use the toolbar to shape your notes.</p>';
@@ -13,6 +14,28 @@ const getClipboardHtml = (element) => {
   const html = element?.innerHTML || '';
 
   return `<!doctype html><html><body>${html}</body></html>`;
+};
+
+const textToHtml = (text) =>
+  text
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${paragraph.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>`)
+    .join('');
+
+const createNativeTranslator = async (sourceLanguage, targetLanguage) => {
+  if (window.Translator?.create) {
+    return window.Translator.create({ sourceLanguage, targetLanguage });
+  }
+
+  if (window.ai?.translator?.create) {
+    return window.ai.translator.create({ sourceLanguage, targetLanguage });
+  }
+
+  if (window.translation?.createTranslator) {
+    return window.translation.createTranslator({ sourceLanguage, targetLanguage });
+  }
+
+  return null;
 };
 
 const getStats = (text) => {
@@ -31,6 +54,12 @@ function App() {
   const [toast, setToast] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
+  const [mode, setMode] = useState('editor');
+  const [sourceLanguage, setSourceLanguage] = useState('en');
+  const [targetLanguage, setTargetLanguage] = useState('hi');
+  const [translatorText, setTranslatorText] = useState('');
+  const [translatedText, setTranslatedText] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const stats = useMemo(() => getStats(plainText), [plainText]);
 
@@ -60,6 +89,24 @@ function App() {
   const handleParagraph = () => runCommand('formatBlock', 'p');
 
   const handleCopy = async () => {
+    if (mode === 'translator') {
+      const text = translatedText.trim() ? translatedText : translatorText;
+
+      if (!text.trim()) {
+        showToast('No translator text to copy');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(translatedText.trim() ? 'Translation copied' : 'Translator text copied');
+      } catch {
+        showToast('Copy is blocked by your browser');
+      }
+
+      return;
+    }
+
     const editor = editorRef.current;
     const text = getPlainText(editor);
     const html = getClipboardHtml(editor);
@@ -104,6 +151,13 @@ function App() {
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
+
+      if (mode === 'translator') {
+        setTranslatorText((currentText) => `${currentText}${currentText ? '\n' : ''}${text}`);
+        showToast('Text pasted into translator');
+        return;
+      }
+
       focusEditor();
       document.execCommand('insertText', false, text);
       syncEditorState();
@@ -115,6 +169,13 @@ function App() {
   };
 
   const handleClear = () => {
+    if (mode === 'translator') {
+      setTranslatorText('');
+      setTranslatedText('');
+      showToast('Translator cleared');
+      return;
+    }
+
     focusEditor();
     document.execCommand('selectAll', false, null);
     document.execCommand('insertHTML', false, '<p><br></p>');
@@ -123,16 +184,105 @@ function App() {
   };
 
   const handleDownload = () => {
-    const text = getPlainText(editorRef.current);
+    const text = mode === 'translator'
+      ? translatedText || translatorText
+      : getPlainText(editorRef.current);
+
+    if (!text.trim()) {
+      showToast('Nothing to download');
+      return;
+    }
+
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
     link.href = url;
-    link.download = 'simple-text-editor.txt';
+    link.download = mode === 'translator' ? 'translated-text.txt' : 'simple-text-editor.txt';
     link.click();
     URL.revokeObjectURL(url);
     showToast('Text downloaded');
+  };
+
+  const handleToggleTranslator = () => {
+    const nextMode = mode === 'editor' ? 'translator' : 'editor';
+
+    if (nextMode === 'translator' && !translatorText.trim()) {
+      setTranslatorText(getPlainText(editorRef.current));
+    }
+
+    setMode(nextMode);
+  };
+
+  const handleUseEditorText = () => {
+    setTranslatorText(getPlainText(editorRef.current));
+    showToast('Editor text loaded');
+  };
+
+  const handleTranslate = async () => {
+    const text = translatorText.trim();
+
+    if (!text) {
+      showToast('Add text to translate');
+      return;
+    }
+
+    if (sourceLanguage === targetLanguage) {
+      setTranslatedText(translatorText);
+      showToast('Source and target languages match');
+      return;
+    }
+
+    setIsTranslating(true);
+
+    try {
+      const translator = await createNativeTranslator(sourceLanguage, targetLanguage);
+
+      if (!translator?.translate) {
+        showToast('Browser translation is not available');
+        return;
+      }
+
+      const result = await translator.translate(translatorText);
+      setTranslatedText(result);
+      showToast('Text translated');
+    } catch {
+      showToast('Translation is not available in this browser');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleCopyTranslation = async () => {
+    if (!translatedText.trim()) {
+      showToast('No translation to copy');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(translatedText);
+      showToast('Translation copied');
+    } catch {
+      showToast('Copy is blocked by your browser');
+    }
+  };
+
+  const handleInsertTranslation = () => {
+    if (!translatedText.trim()) {
+      showToast('No translation to insert');
+      return;
+    }
+
+    const html = textToHtml(translatedText);
+    setContent(html);
+    setPlainText(translatedText);
+    setMode('editor');
+    window.requestAnimationFrame(() => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = html;
+      }
+    });
+    showToast('Translation inserted');
   };
 
   const findMatches = () => {
@@ -252,6 +402,8 @@ function App() {
           onPaste={handlePaste}
           onClear={handleClear}
           onDownload={handleDownload}
+          onToggleTranslator={handleToggleTranslator}
+          isTranslatorMode={mode === 'translator'}
           searchQuery={searchQuery}
           onSearchQueryChange={(value) => {
             setSearchQuery(value);
@@ -260,12 +412,29 @@ function App() {
           onFind={handleFind}
         />
 
-        <Editor
-          ref={editorRef}
-          content={content}
-          onInput={handleEditorInput}
-          onKeyDown={handleShortcut}
-        />
+        {mode === 'editor' ? (
+          <Editor
+            ref={editorRef}
+            content={content}
+            onInput={handleEditorInput}
+            onKeyDown={handleShortcut}
+          />
+        ) : (
+          <Translator
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            sourceText={translatorText}
+            translatedText={translatedText}
+            isTranslating={isTranslating}
+            onSourceLanguageChange={setSourceLanguage}
+            onTargetLanguageChange={setTargetLanguage}
+            onSourceTextChange={setTranslatorText}
+            onTranslate={handleTranslate}
+            onUseEditorText={handleUseEditorText}
+            onCopyTranslation={handleCopyTranslation}
+            onInsertTranslation={handleInsertTranslation}
+          />
+        )}
 
         <StatsBar stats={stats} />
       </section>

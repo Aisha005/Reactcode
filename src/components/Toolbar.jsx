@@ -131,6 +131,16 @@ const icons = {
       <path d="M9 7V4h6v3" />
     </Icon>
   ),
+  translate: (
+    <Icon>
+      <path d="M4 5h7" />
+      <path d="M8 3v2" />
+      <path d="M5 9c1.3 3 3.7 5.1 7 6" />
+      <path d="M12 5c-.8 4.6-3.3 8-8 10" />
+      <path d="M13 21l4-10 4 10" />
+      <path d="M15 17h4" />
+    </Icon>
+  ),
   search: (
     <Icon>
       <circle cx="11" cy="11" r="6" />
@@ -162,6 +172,8 @@ function Toolbar({
   onPaste,
   onClear,
   onDownload,
+  onToggleTranslator,
+  isTranslatorMode,
   searchQuery,
   onSearchQueryChange,
   onFind
@@ -223,6 +235,13 @@ function Toolbar({
         </div>
 
         <div className="toolbar-actions" aria-label="Editor actions">
+          <IconButton
+            className={`action-button ${isTranslatorMode ? 'active-action' : ''}`}
+            title={isTranslatorMode ? 'Switch to editor' : 'Switch to translator'}
+            onClick={onToggleTranslator}
+          >
+            {icons.translate}
+          </IconButton>
           <IconButton className="action-button" title="Copy text" onClick={onCopy}>
             {icons.copy}
           </IconButton>
